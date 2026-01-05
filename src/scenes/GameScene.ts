@@ -32,7 +32,6 @@ export class GameScene extends Phaser.Scene {
   private audioManager!: AudioManager;
   private hud!: HUD;
   private virtualJoystick?: VirtualJoystick;
-  private drawButton?: DrawButton;
   
   // Datos del juego (para pasar entre scenes)
   private gameData: {
