@@ -34,8 +34,6 @@ export class GameScene extends Phaser.Scene {
   private hud!: HUD;
   private virtualJoystick?: VirtualJoystick;
   private drawButton?: DrawButton;
-  private virtualJoystick?: VirtualJoystick;
-  private drawModeButton?: DrawModeButton;
   
   // Datos del juego (para pasar entre scenes)
   private gameData: {
@@ -130,21 +128,6 @@ export class GameScene extends Phaser.Scene {
     this.enemyManager.setLineDrawer(this.lineDrawer);
     this.enemyManager.setPolygonFiller(this.polygonFiller);
     this.powerUpManager.setPlayer(this.player);
-
-    // Si se usan controles táctiles, crear joystick y botón de dibujo
-    if (useTouchControls) {
-      // Joystick en la esquina inferior izquierda
-      this.virtualJoystick = new VirtualJoystick(this);
-      this.player.setVirtualJoystick(this.virtualJoystick);
-
-      // Botón de modo dibujo en la esquina inferior derecha
-      this.drawButton = new DrawButton(this);
-
-      // Conectar botón con LineDrawer
-      this.events.on('drawModeToggled', (data: { active: boolean }) => {
-        this.lineDrawer.setActive(data.active);
-      });
-    }
 
     // Configurar eventos
     this.setupEvents();
