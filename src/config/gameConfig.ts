@@ -59,7 +59,7 @@ export const LINE_DRAWER_CONFIG = {
   LINE_COLOR: 0xffffff, // Blanco
   LINE_WIDTH: 2,
   CLOSE_INDICATOR_COLOR: 0x00ff00, // Verde
-  CLOSE_DISTANCE_THRESHOLD: 30, // Distancia para detectar cierre
+  CLOSE_DISTANCE_THRESHOLD: 60, // Distancia para detectar cierre (60px como solicitado)
   MIN_POINT_DISTANCE: 5, // Distancia mínima entre puntos (evitar acumulación)
   ACTIVE: true, // Si el dibujo está activo
 } as const;

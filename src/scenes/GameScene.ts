@@ -13,6 +13,8 @@ import { EnemyManager } from '../systems/EnemyManager';
 import { PowerUpManager } from '../systems/PowerUpManager';
 import { AudioManager } from '../systems/AudioManager';
 import { HUD } from '../ui/HUD';
+import { VirtualJoystick } from '../ui/VirtualJoystick';
+import { DrawModeButton } from '../ui/DrawModeButton';
 
 /**
  * Escena principal del juego
@@ -30,6 +32,8 @@ export class GameScene extends Phaser.Scene {
   private powerUpManager!: PowerUpManager;
   private audioManager!: AudioManager;
   private hud!: HUD;
+  private virtualJoystick?: VirtualJoystick;
+  private drawModeButton?: DrawModeButton;
   
   // Datos del juego (para pasar entre scenes)
   private gameData: {
@@ -107,6 +111,35 @@ export class GameScene extends Phaser.Scene {
     this.enemyManager.setLineDrawer(this.lineDrawer);
     this.enemyManager.setPolygonFiller(this.polygonFiller);
     this.powerUpManager.setPlayer(this.player);
+
+    // Si se usan controles táctiles, crear joystick y botón de dibujo
+    if (useTouchControls) {
+      const screenHeight = this.cameras.main.height;
+      const screenWidth = this.cameras.main.width;
+      
+      // Joystick en la esquina inferior izquierda
+      this.virtualJoystick = new VirtualJoystick(
+        this,
+        screenWidth * 0.15, // 15% desde la izquierda
+        screenHeight - 100  // 100px desde abajo
+      );
+      this.player.setVirtualJoystick(this.virtualJoystick);
+
+      // Botón de modo dibujo en la esquina inferior derecha
+      this.drawModeButton = new DrawModeButton(
+        this,
+        screenWidth * 0.85, // 85% desde la izquierda (esquina inferior derecha)
+        screenHeight - 100  // 100px desde abajo
+      );
+
+      // Conectar botón con LineDrawer
+      this.events.on('drawModeToggled', (isActive: boolean) => {
+        this.lineDrawer.setActive(isActive);
+      });
+
+      // Iniciar con modo dibujo desactivado
+      this.lineDrawer.setActive(false);
+    }
 
     // Configurar eventos
     this.setupEvents();
