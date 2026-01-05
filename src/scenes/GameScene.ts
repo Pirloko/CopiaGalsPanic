@@ -76,11 +76,17 @@ export class GameScene extends Phaser.Scene {
       0x1a1a1a
     ).setStrokeStyle(2, 0x666666);
 
+    // Detectar si es móvil/táctil
+    const isMobile = (globalThis as any).__GAME_IS_MOBILE__ || false;
+    const isTouch = (globalThis as any).__GAME_IS_TOUCH__ || false;
+    const useTouchControls = isMobile || isTouch;
+
     // Crear jugador
     this.player = new Player(
       this,
       PLAYER_CONFIG.START_X,
-      PLAYER_CONFIG.START_Y
+      PLAYER_CONFIG.START_Y,
+      useTouchControls
     );
 
     // Inicializar sistemas
