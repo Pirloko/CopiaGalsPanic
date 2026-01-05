@@ -99,16 +99,22 @@ export class GameScene extends Phaser.Scene {
 
     // Si se usan controles táctiles, crear joystick virtual y botón de trazado
     if (useTouchControls) {
-      // Joystick FUERA del área de juego (debajo de GAME_AREA_HEIGHT)
+      // Joystick debajo del área de juego pero dentro del canvas visible
+      // En móviles, posicionar en la parte inferior pero visible (usar coordenadas de pantalla)
+      const screenWidth = this.cameras.main.width;
+      const screenHeight = this.cameras.main.height;
+      
+      // Calcular posición: debajo del área de juego pero dentro del canvas
+      // Usar una posición que esté visible en la pantalla
       const joystickX = GAME_CONFIG.GAME_AREA_WIDTH * 0.25; // 25% del ancho del área de juego
-      const joystickY = GAME_CONFIG.GAME_AREA_HEIGHT + 80; // Fuera del área de juego (600 + 80)
+      const joystickY = GAME_CONFIG.GAME_AREA_HEIGHT - 50; // 50px desde el borde inferior del área de juego (dentro pero abajo)
       
       this.virtualJoystick = new VirtualJoystick(this, joystickX, joystickY);
       this.player.setVirtualJoystick(this.virtualJoystick);
 
-      // Botón de trazado FUERA del área de juego (lado derecho)
+      // Botón de trazado debajo del área de juego pero dentro del canvas visible
       const buttonX = GAME_CONFIG.GAME_AREA_WIDTH * 0.75; // 75% del ancho del área de juego
-      const buttonY = GAME_CONFIG.GAME_AREA_HEIGHT + 80; // Misma altura que el joystick
+      const buttonY = GAME_CONFIG.GAME_AREA_HEIGHT - 50; // Misma altura que el joystick
       this.drawButton = new DrawButton(this, buttonX, buttonY);
 
       // Conectar botón con Player
