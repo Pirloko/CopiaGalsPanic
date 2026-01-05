@@ -29,10 +29,11 @@ export class VirtualJoystick {
    * Configura el joystick virtual
    */
   private setupJoystick(): void {
-    // Posición en la esquina inferior izquierda del área de juego (NO del HUD)
-    // Ajustar para que esté dentro del área de juego (800x600)
+    // Posición en la esquina inferior izquierda, debajo del área de juego
+    // Usar coordenadas de pantalla (scrollFactor 0), posicionado en la parte inferior
+    const screenHeight = this.scene.cameras.main.height;
     this.baseX = 100;
-    this.baseY = GAME_CONFIG.GAME_AREA_HEIGHT - 100;
+    this.baseY = screenHeight - 100; // 100px desde el borde inferior de la pantalla
     
     // Base del joystick (fondo)
     this.base = this.scene.add.circle(
