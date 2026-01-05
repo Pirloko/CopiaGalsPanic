@@ -1,47 +1,34 @@
 import Phaser from 'phaser';
-import { GAME_CONFIG } from '../config/gameConfig';
 
 /**
- * Botón para activar/desactivar el modo de dibujo
+ * Botón para activar/desactivar el modo de trazado
  */
 export class DrawButton {
   private scene: Phaser.Scene;
   private button!: Phaser.GameObjects.Container;
-  private background!: Phaser.GameObjects.Rectangle;
+  private background!: Phaser.GameObjects.Arc;
   private icon!: Phaser.GameObjects.Text;
   private isActive: boolean = false;
-  private buttonX: number = 0;
-  private buttonY: number = 0;
-  private width: number = 80;
-  private height: number = 80;
+  private x: number;
+  private y: number;
+  private radius: number = 50;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Phaser.Scene, x: number, y: number) {
     this.scene = scene;
-    this.setupButton();
+    this.x = x;
+    this.y = y;
+    this.create();
   }
 
   /**
-   * Configura el botón
+   * Crea los elementos visuales del botón
    */
-  private setupButton(): void {
-    // Posición: lado derecho, cerca del joystick (debajo del área de juego)
-    const screenHeight = this.scene.cameras.main.height;
-    const screenWidth = this.scene.cameras.main.width;
-    this.buttonX = screenWidth - 120; // 120px desde el borde derecho
-    this.buttonY = screenHeight - 100; // 100px desde el borde inferior (misma altura que joystick)
+  private create(): void {
+    // Contenedor para agrupar el botón
+    this.button = this.scene.add.container(this.x, this.y);
 
-    // Crear contenedor
-    this.button = this.scene.add.container(this.buttonX, this.buttonY);
-
-    // Fondo del botón (rectángulo redondeado)
-    this.background = this.scene.add.rectangle(
-      0,
-      0,
-      this.width,
-      this.height,
-      0x333333,
-      0.8
-    );
+    // Fondo del botón
+    this.background = this.scene.add.circle(0, 0, this.radius, 0x333333, 0.8);
     this.background.setStrokeStyle(3, 0xffffff);
     this.background.setInteractive({ useHandCursor: true });
 
@@ -124,4 +111,3 @@ export class DrawButton {
     this.button.destroy();
   }
 }
-

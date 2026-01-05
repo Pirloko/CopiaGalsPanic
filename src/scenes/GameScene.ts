@@ -14,6 +14,7 @@ import { PowerUpManager } from '../systems/PowerUpManager';
 import { AudioManager } from '../systems/AudioManager';
 import { HUD } from '../ui/HUD';
 import { VirtualJoystick } from '../ui/VirtualJoystick';
+import { DrawButton } from '../ui/DrawButton';
 
 /**
  * Escena principal del juego
@@ -32,6 +33,7 @@ export class GameScene extends Phaser.Scene {
   private audioManager!: AudioManager;
   private hud!: HUD;
   private virtualJoystick?: VirtualJoystick;
+  private drawButton?: DrawButton;
   
   // Datos del juego (para pasar entre scenes)
   private gameData: {
@@ -127,32 +129,17 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
-   * Configura los eventos de entrada para el trazado (como en el juego original)
+   * Configura los eventos de entrada para el trazado (solo para desktop, móviles usan botón)
    */
   private setupTracingInput(): void {
-    // Cuando se presiona el botón (mouse/touch), iniciar trazado
+    // Cuando se presiona el botón del mouse, iniciar trazado
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       if (this.player && !this.player.getIsInvulnerable()) {
-        // Verificar que no estemos tocando el joystick en móviles
-        if (this.virtualJoystick) {
-          const screenX = pointer.x;
-          const screenY = pointer.y;
-          const screenHeight = this.cameras.main.height;
-          const joystickX = 100;
-          const joystickY = screenHeight - 100;
-          const distance = Phaser.Math.Distance.Between(screenX, screenY, joystickX, joystickY);
-          
-          // Si estamos tocando el área del joystick, no iniciar trazado
-          if (distance <= 110) { // radio + margen
-            return;
-          }
-        }
-        
         this.player.startTracing();
       }
     });
 
-    // Cuando se suelta el botón, procesar el trazado
+    // Cuando se suelta el botón del mouse, procesar el trazado
     this.input.on('pointerup', () => {
       if (this.player && this.player.isTracing) {
         this.lineDrawer.processTrace();

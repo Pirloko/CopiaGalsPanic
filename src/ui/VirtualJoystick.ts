@@ -20,8 +20,11 @@ export class VirtualJoystick {
   // Dirección actual (normalizada)
   public direction: Phaser.Math.Vector2 = new Phaser.Math.Vector2(0, 0);
   
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Phaser.Scene, x?: number, y?: number) {
     this.scene = scene;
+    // Si se proporcionan coordenadas, usarlas; sino, usar valores por defecto
+    this.baseX = x !== undefined ? x : 100;
+    this.baseY = y !== undefined ? y : this.scene.cameras.main.height - 100;
     this.setupJoystick();
   }
 
@@ -29,11 +32,7 @@ export class VirtualJoystick {
    * Configura el joystick virtual
    */
   private setupJoystick(): void {
-    // Posición en la esquina inferior izquierda, debajo del área de juego
-    // Usar coordenadas de pantalla (scrollFactor 0), posicionado en la parte inferior
-    const screenHeight = this.scene.cameras.main.height;
-    this.baseX = 100;
-    this.baseY = screenHeight - 100; // 100px desde el borde inferior de la pantalla
+    // Usar las coordenadas establecidas en el constructor
     
     // Base del joystick (fondo)
     this.base = this.scene.add.circle(
