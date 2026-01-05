@@ -133,7 +133,7 @@ export class GameScene extends Phaser.Scene {
    */
   private setupTracingInput(): void {
     // Cuando se presiona el botón del mouse, iniciar trazado
-    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+    this.input.on('pointerdown', () => {
       if (this.player && !this.player.getIsInvulnerable()) {
         this.player.startTracing();
       }
