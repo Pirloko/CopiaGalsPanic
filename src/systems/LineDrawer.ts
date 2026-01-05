@@ -176,10 +176,15 @@ export class LineDrawer {
    * Convierte las coordenadas del pointer a coordenadas del mundo del juego
    */
   private getWorldPoint(pointer: Phaser.Input.Pointer): Point {
+    // En móviles con scale, necesitamos usar las coordenadas correctas
     // Usar worldX y worldY para obtener coordenadas del mundo (independiente de cámara)
+    // Si worldX/worldY no están disponibles, usar x/y normalizadas
+    const worldX = pointer.worldX !== undefined ? pointer.worldX : pointer.x;
+    const worldY = pointer.worldY !== undefined ? pointer.worldY : pointer.y;
+    
     return {
-      x: pointer.worldX,
-      y: pointer.worldY,
+      x: worldX,
+      y: worldY,
     };
   }
 

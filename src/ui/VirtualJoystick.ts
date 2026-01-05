@@ -29,9 +29,10 @@ export class VirtualJoystick {
    * Configura el joystick virtual
    */
   private setupJoystick(): void {
-    // Posición en la esquina inferior izquierda
+    // Posición en la esquina inferior izquierda del área de juego (NO del HUD)
+    // Ajustar para que esté dentro del área de juego (800x600)
     this.baseX = 100;
-    this.baseY = GAME_CONFIG.HEIGHT - 100;
+    this.baseY = GAME_CONFIG.GAME_AREA_HEIGHT - 100;
     
     // Base del joystick (fondo)
     this.base = this.scene.add.circle(
@@ -75,12 +76,14 @@ export class VirtualJoystick {
     const screenY = pointer.y;
     
     // Verificar si el toque está cerca de la base del joystick
+    // Solo activar si está dentro del área del joystick (esquina inferior izquierda)
     const distance = Phaser.Math.Distance.Between(screenX, screenY, this.baseX, this.baseY);
     
     if (distance <= this.radius + 50) {
-      // Si el toque está en el área del joystick, activar
+      // Si el toque está en el área del joystick, activar y prevenir propagación
       this.isActive = true;
       this.updateStickPosition(screenX, screenY);
+      // NO prevenir propagación aquí - dejar que otros sistemas también funcionen
     }
   }
 
