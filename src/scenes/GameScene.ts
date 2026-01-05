@@ -85,12 +85,6 @@ export class GameScene extends Phaser.Scene {
     const isTouch = (globalThis as any).__GAME_IS_TOUCH__ || false;
     const useTouchControls = isMobile || isTouch;
 
-    // Inicializar sistemas (primero LineDrawer para que esté disponible)
-    this.lineDrawer = new LineDrawer(this);
-    
-    // Inicializar LineDrawer como inactivo por defecto (se activa con el botón)
-    this.lineDrawer.setActive(false);
-
     // Crear jugador
     this.player = new Player(
       this,
@@ -99,18 +93,16 @@ export class GameScene extends Phaser.Scene {
       useTouchControls
     );
 
-    // Si se usan controles táctiles, crear joystick virtual y botón de dibujo
+    // Inicializar sistemas
+    this.lineDrawer = new LineDrawer(this);
+    
+    // LineDrawer debe estar activo por defecto para que funcione el trazado
+    // El trazado funciona directamente al tocar/arrastrar en el área de juego
+
+    // Si se usan controles táctiles, crear joystick virtual
     if (useTouchControls) {
       this.virtualJoystick = new VirtualJoystick(this);
       this.player.setVirtualJoystick(this.virtualJoystick);
-
-      // Crear botón de dibujo
-      this.drawButton = new DrawButton(this);
-      
-      // Escuchar evento de toggle del botón
-      this.events.on('drawModeToggled', (data: { active: boolean }) => {
-        this.lineDrawer.setActive(data.active);
-      });
     }
     this.polygonFiller = new PolygonFiller(this);
     this.levelManager = new LevelManager(this, this.gameData.level);

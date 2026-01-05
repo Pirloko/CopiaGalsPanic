@@ -1,0 +1,47 @@
+{
+    "neon_nights": {
+        "name": "Neon Nights",
+        "colors": {
+            "primary": "#00ffff",
+            "secondary": "#ff1493",
+            "accent": "#7b2ff7",
+            "dark": "#120458",
+            "light": "#edf2f4"
+        },
+        "effects": {
+            "glow_strength": 5,
+            "particle_count": 100,
+            "transition_speed": 0.3
+        }
+    },
+    "golden_hour": {
+        "name": "Golden Hour",
+        "colors": {
+            "primary": "#ffd700",
+            "secondary": "#ff8c00",
+            "accent": "#ff4500",
+            "dark": "#2c1810",
+            "light": "#fff3e6"
+        },
+        "effects": {
+            "glow_strength": 6,
+            "particle_count": 120,
+            "transition_speed": 0.35
+        }
+    },
+    "ice_queen": {
+        "name": "Ice Queen",
+        "colors": {
+            "primary": "#a5f2f3",
+            "secondary": "#8cd6f7",
+            "accent": "#4361ee",
+            "dark": "#1a1b4b",
+            "light": "#f8f9fa"
+        },
+        "effects": {
+            "glow_strength": 4,
+            "particle_count": 80,
+            "transition_speed": 0.25
+        }
+    }
+} 
