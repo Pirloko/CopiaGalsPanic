@@ -15,8 +15,6 @@ import { AudioManager } from '../systems/AudioManager';
 import { HUD } from '../ui/HUD';
 import { VirtualJoystick } from '../ui/VirtualJoystick';
 import { DrawButton } from '../ui/DrawButton';
-import { VirtualJoystick } from '../ui/VirtualJoystick';
-import { DrawModeButton } from '../ui/DrawModeButton';
 
 /**
  * Escena principal del juego
@@ -135,31 +133,17 @@ export class GameScene extends Phaser.Scene {
 
     // Si se usan controles táctiles, crear joystick y botón de dibujo
     if (useTouchControls) {
-      const screenHeight = this.cameras.main.height;
-      const screenWidth = this.cameras.main.width;
-      
       // Joystick en la esquina inferior izquierda
-      this.virtualJoystick = new VirtualJoystick(
-        this,
-        screenWidth * 0.15, // 15% desde la izquierda
-        screenHeight - 100  // 100px desde abajo
-      );
+      this.virtualJoystick = new VirtualJoystick(this);
       this.player.setVirtualJoystick(this.virtualJoystick);
 
       // Botón de modo dibujo en la esquina inferior derecha
-      this.drawModeButton = new DrawModeButton(
-        this,
-        screenWidth * 0.85, // 85% desde la izquierda (esquina inferior derecha)
-        screenHeight - 100  // 100px desde abajo
-      );
+      this.drawButton = new DrawButton(this);
 
       // Conectar botón con LineDrawer
-      this.events.on('drawModeToggled', (isActive: boolean) => {
-        this.lineDrawer.setActive(isActive);
+      this.events.on('drawModeToggled', (data: { active: boolean }) => {
+        this.lineDrawer.setActive(data.active);
       });
-
-      // Iniciar con modo dibujo desactivado
-      this.lineDrawer.setActive(false);
     }
 
     // Configurar eventos
