@@ -97,10 +97,36 @@ export class GameScene extends Phaser.Scene {
     this.lineDrawer = new LineDrawer(this);
     this.lineDrawer.setPlayer(this.player); // Conectar jugador con LineDrawer
 
-    // Si se usan controles táctiles, crear joystick virtual
+    // Si se usan controles táctiles, crear joystick virtual y botón de trazado
     if (useTouchControls) {
-      this.virtualJoystick = new VirtualJoystick(this);
+      // Joystick debajo del área de juego (centrado en el área de juego)
+      const screenWidth = this.cameras.main.width;
+      const screenHeight = this.cameras.main.height;
+      const joystickY = screenHeight - 100; // 100px desde el borde inferior
+      const joystickX = screenWidth * 0.25; // 25% desde la izquierda (centrado en el área de juego)
+      
+      this.virtualJoystick = new VirtualJoystick(this, joystickX, joystickY);
       this.player.setVirtualJoystick(this.virtualJoystick);
+
+      // Botón de trazado debajo del área de juego (lado derecho)
+      const buttonX = screenWidth * 0.75; // 75% desde la izquierda
+      const buttonY = screenHeight - 100; // Misma altura que el joystick
+      this.drawButton = new DrawButton(this, buttonX, buttonY);
+
+      // Conectar botón con Player
+      this.events.on('drawModeToggled', (data: { active: boolean }) => {
+        if (data.active) {
+          // Iniciar trazado si no está invulnerable
+          if (!this.player.getIsInvulnerable()) {
+            this.player.startTracing();
+          }
+        } else {
+          // Detener trazado y procesar polígono si existe
+          if (this.player.isTracing) {
+            this.lineDrawer.processTrace();
+          }
+        }
+      });
     }
 
     this.polygonFiller = new PolygonFiller(this);
@@ -132,19 +158,22 @@ export class GameScene extends Phaser.Scene {
    * Configura los eventos de entrada para el trazado (solo para desktop, móviles usan botón)
    */
   private setupTracingInput(): void {
-    // Cuando se presiona el botón del mouse, iniciar trazado
-    this.input.on('pointerdown', () => {
-      if (this.player && !this.player.getIsInvulnerable()) {
-        this.player.startTracing();
-      }
-    });
+    // Solo configurar eventos de mouse si NO es móvil (móviles usan el botón)
+    if (!this.virtualJoystick) {
+      // Cuando se presiona el botón del mouse, iniciar trazado
+      this.input.on('pointerdown', () => {
+        if (this.player && !this.player.getIsInvulnerable()) {
+          this.player.startTracing();
+        }
+      });
 
-    // Cuando se suelta el botón del mouse, procesar el trazado
-    this.input.on('pointerup', () => {
-      if (this.player && this.player.isTracing) {
-        this.lineDrawer.processTrace();
-      }
-    });
+      // Cuando se suelta el botón del mouse, procesar el trazado
+      this.input.on('pointerup', () => {
+        if (this.player && this.player.isTracing) {
+          this.lineDrawer.processTrace();
+        }
+      });
+    }
   }
 
   /**
