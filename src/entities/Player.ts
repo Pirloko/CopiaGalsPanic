@@ -75,6 +75,7 @@ export class Player extends Phaser.GameObjects.Arc {
 
   /**
    * Detiene el trazado y retorna los puntos
+   * Si hay un punto de predicción cercano, conectar automáticamente al primer punto
    */
   public stopTracing(): Point[] {
     if (!this.isTracing) {
@@ -83,12 +84,14 @@ export class Player extends Phaser.GameObjects.Arc {
 
     this.isTracing = false;
 
-    // Si hay un punto de predicción, usarlo como punto final
-    if (this.predictionPoint) {
-      this.tracePoints.push(this.predictionPoint);
+    const currentPoint = { x: this.x, y: this.y };
+
+    // Si hay un punto de predicción (estamos cerca del primer punto), conectarlo automáticamente
+    if (this.predictionPoint && this.tracePoints.length > 0) {
+      // Conectar al primer punto (cierre automático)
+      this.tracePoints.push({ ...this.tracePoints[0] });
     } else {
       // Añadir el último punto si es diferente
-      const currentPoint = { x: this.x, y: this.y };
       if (!this.lastValidPoint || 
           Geometry.distance(currentPoint, this.lastValidPoint) > 0.1) {
         this.tracePoints.push(currentPoint);
@@ -147,6 +150,7 @@ export class Player extends Phaser.GameObjects.Arc {
 
   /**
    * Actualiza el punto de predicción para el cierre del polígono
+   * Calcula distancia al PRIMER punto del trazado (como especifica el usuario)
    */
   private updatePredictionPoint(currentPoint: Point): void {
     if (this.tracePoints.length < 3) {
@@ -154,20 +158,16 @@ export class Player extends Phaser.GameObjects.Arc {
       return;
     }
 
-    // Ignorar los últimos puntos para evitar conexiones no deseadas
-    const pointsToCheck = this.tracePoints.slice(0, -2);
-    let closestPoint: Point | null = null;
-    let minDistance = this.predictionDistance;
+    // Calcular distancia del punto actual al PRIMER punto del trazado
+    const firstPoint = this.tracePoints[0];
+    const distanceToFirst = Geometry.distance(currentPoint, firstPoint);
 
-    for (const point of pointsToCheck) {
-      const distance = Geometry.distance(currentPoint, point);
-      if (distance < minDistance) {
-        minDistance = distance;
-        closestPoint = point;
-      }
+    // Si la distancia es menor al umbral (60px), mostrar predicción
+    if (distanceToFirst < this.predictionDistance) {
+      this.predictionPoint = firstPoint;
+    } else {
+      this.predictionPoint = null;
     }
-
-    this.predictionPoint = closestPoint;
   }
 
   /**
