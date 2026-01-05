@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { PLAYER_CONFIG } from '../config/gameConfig';
 import { VirtualJoystick } from '../ui/VirtualJoystick';
+import { Geometry, Point } from '../utils/geometry';
+import { LINE_DRAWER_CONFIG } from '../config/gameConfig';
 
 /**
  * Entidad del jugador
@@ -14,6 +16,14 @@ export class Player extends Phaser.GameObjects.Arc {
   private isInvulnerable: boolean = false;
   private invulnerabilityTimer?: Phaser.Time.TimerEvent;
   private useTouchControls: boolean = false;
+
+  // Estado del trazado (como en el juego original)
+  public isTracing: boolean = false;
+  private tracePoints: Point[] = [];
+  private lastValidPoint: Point | null = null;
+  private predictionPoint: Point | null = null;
+  private readonly minPointDistance: number = LINE_DRAWER_CONFIG.MIN_POINT_DISTANCE;
+  private readonly predictionDistance: number = LINE_DRAWER_CONFIG.CLOSE_DISTANCE_THRESHOLD;
 
   constructor(scene: Phaser.Scene, x: number, y: number, useTouchControls: boolean = false) {
     super(scene, x, y, PLAYER_CONFIG.SIZE, 0, 360, false, PLAYER_CONFIG.COLOR);
@@ -33,10 +43,7 @@ export class Player extends Phaser.GameObjects.Arc {
    * Configura los controles (teclado o táctil)
    */
   private setupInput(): void {
-    if (this.useTouchControls) {
-      // Crear joystick virtual para móviles
-      this.virtualJoystick = new VirtualJoystick(this.scene);
-    } else {
+    if (!this.useTouchControls) {
       // Controles de teclado para desktop
       if (this.scene.input.keyboard) {
         this.cursors = this.scene.input.keyboard.createCursorKeys();
@@ -50,6 +57,131 @@ export class Player extends Phaser.GameObjects.Arc {
   public setVirtualJoystick(joystick: VirtualJoystick): void {
     this.virtualJoystick = joystick;
     this.useTouchControls = true;
+  }
+
+  /**
+   * Inicia el trazado (llamado cuando se presiona el botón del mouse/touch)
+   */
+  public startTracing(): void {
+    if (this.isInvulnerable) {
+      return; // No permitir trazado mientras está invulnerable
+    }
+    
+    this.isTracing = true;
+    this.tracePoints = [{ x: this.x, y: this.y }];
+    this.lastValidPoint = { x: this.x, y: this.y };
+    this.predictionPoint = null;
+  }
+
+  /**
+   * Detiene el trazado y retorna los puntos
+   */
+  public stopTracing(): Point[] {
+    if (!this.isTracing) {
+      return [];
+    }
+
+    this.isTracing = false;
+
+    // Si hay un punto de predicción, usarlo como punto final
+    if (this.predictionPoint) {
+      this.tracePoints.push(this.predictionPoint);
+    } else {
+      // Añadir el último punto si es diferente
+      const currentPoint = { x: this.x, y: this.y };
+      if (!this.lastValidPoint || 
+          Geometry.distance(currentPoint, this.lastValidPoint) > 0.1) {
+        this.tracePoints.push(currentPoint);
+      }
+    }
+
+    const points = [...this.tracePoints];
+    this.clearTracing();
+    return points;
+  }
+
+  /**
+   * Cancela el trazado sin retornar puntos
+   */
+  public cancelTracing(): void {
+    this.isTracing = false;
+    this.clearTracing();
+  }
+
+  /**
+   * Limpia todas las variables relacionadas con el trazado
+   */
+  private clearTracing(): void {
+    this.tracePoints = [];
+    this.lastValidPoint = null;
+    this.predictionPoint = null;
+  }
+
+  /**
+   * Actualiza el trazado basado en la posición del jugador
+   */
+  private updateTracing(): void {
+    if (!this.isTracing) {
+      return;
+    }
+
+    const currentPoint: Point = { x: this.x, y: this.y };
+    
+    if (!this.lastValidPoint) {
+      this.lastValidPoint = currentPoint;
+      return;
+    }
+
+    // Calcular distancia al último punto
+    const distance = Geometry.distance(currentPoint, this.lastValidPoint);
+
+    // Añadir punto solo si está lo suficientemente lejos
+    if (distance >= this.minPointDistance) {
+      this.tracePoints.push(currentPoint);
+      this.lastValidPoint = currentPoint;
+    }
+
+    // Actualizar punto de predicción (para cierre de polígono)
+    this.updatePredictionPoint(currentPoint);
+  }
+
+  /**
+   * Actualiza el punto de predicción para el cierre del polígono
+   */
+  private updatePredictionPoint(currentPoint: Point): void {
+    if (this.tracePoints.length < 3) {
+      this.predictionPoint = null;
+      return;
+    }
+
+    // Ignorar los últimos puntos para evitar conexiones no deseadas
+    const pointsToCheck = this.tracePoints.slice(0, -2);
+    let closestPoint: Point | null = null;
+    let minDistance = this.predictionDistance;
+
+    for (const point of pointsToCheck) {
+      const distance = Geometry.distance(currentPoint, point);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestPoint = point;
+      }
+    }
+
+    this.predictionPoint = closestPoint;
+  }
+
+  /**
+   * Obtiene los puntos del trazado actual
+   */
+  public getTracePoints(): Point[] {
+    return [...this.tracePoints];
+  }
+
+  /**
+   * Obtiene el punto de predicción (para cierre)
+   */
+  public getPredictionPoint(): Point | null {
+    return this.predictionPoint;
   }
 
   /**
@@ -120,54 +252,39 @@ export class Player extends Phaser.GameObjects.Arc {
     }
     
     body.setVelocity(this.velocityX, this.velocityY);
+
+    // Actualizar trazado si está activo (como en el juego original)
+    this.updateTracing();
   }
 
   /**
-   * Hace al jugador invulnerable temporalmente
-   * TODO: Implementar efectos visuales (parpadeo, glow)
+   * Establece el estado de invulnerabilidad
    */
-  setInvulnerable(duration: number = PLAYER_CONFIG.INVULNERABILITY_TIME): void {
-    if (this.invulnerabilityTimer) {
-      this.invulnerabilityTimer.destroy();
+  public setInvulnerable(duration: number): void {
+    if (this.isInvulnerable) {
+      return;
     }
-    
+
     this.isInvulnerable = true;
-    
-    this.invulnerabilityTimer = this.scene.time.delayedCall(duration, () => {
-      this.isInvulnerable = false;
-      this.setAlpha(1);
-    });
-    
-    // Efecto visual básico (parpadeo)
-    this.scene.tweens.add({
-      targets: this,
-      alpha: 0.3,
-      duration: 100,
-      yoyo: true,
-      repeat: Math.floor(duration / 200),
-      onComplete: () => {
-        this.setAlpha(1);
-      }
-    });
-  }
 
-  /**
-   * Verifica si el jugador es invulnerable
-   */
-  getInvulnerable(): boolean {
-    return this.isInvulnerable;
-  }
+    // Crear efecto de parpadeo
+    this.setAlpha(0.5);
 
-  /**
-   * Limpia recursos
-   */
-  destroy(): void {
     if (this.invulnerabilityTimer) {
       this.invulnerabilityTimer.destroy();
     }
-    if (this.virtualJoystick) {
-      this.virtualJoystick.destroy();
-    }
-    super.destroy();
+
+    this.invulnerabilityTimer = this.scene.time.delayedCall(duration * 1000, () => {
+      this.isInvulnerable = false;
+      this.setAlpha(1.0);
+      this.invulnerabilityTimer = undefined;
+    });
+  }
+
+  /**
+   * Obtiene si el jugador es invulnerable
+   */
+  public getIsInvulnerable(): boolean {
+    return this.isInvulnerable;
   }
 }

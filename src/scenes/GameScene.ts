@@ -14,7 +14,6 @@ import { PowerUpManager } from '../systems/PowerUpManager';
 import { AudioManager } from '../systems/AudioManager';
 import { HUD } from '../ui/HUD';
 import { VirtualJoystick } from '../ui/VirtualJoystick';
-import { DrawButton } from '../ui/DrawButton';
 
 /**
  * Escena principal del juego
@@ -95,15 +94,14 @@ export class GameScene extends Phaser.Scene {
 
     // Inicializar sistemas
     this.lineDrawer = new LineDrawer(this);
-    
-    // LineDrawer debe estar activo por defecto para que funcione el trazado
-    // El trazado funciona directamente al tocar/arrastrar en el área de juego
+    this.lineDrawer.setPlayer(this.player); // Conectar jugador con LineDrawer
 
     // Si se usan controles táctiles, crear joystick virtual
     if (useTouchControls) {
       this.virtualJoystick = new VirtualJoystick(this);
       this.player.setVirtualJoystick(this.virtualJoystick);
     }
+
     this.polygonFiller = new PolygonFiller(this);
     this.levelManager = new LevelManager(this, this.gameData.level);
     this.timeManager = new TimeManager(this);
@@ -122,10 +120,45 @@ export class GameScene extends Phaser.Scene {
     this.powerUpManager.setPlayer(this.player);
 
     // Configurar eventos
+    this.setupTracingInput();
     this.setupEvents();
 
     // Iniciar juego
     this.startLevel(this.gameData.level);
+  }
+
+  /**
+   * Configura los eventos de entrada para el trazado (como en el juego original)
+   */
+  private setupTracingInput(): void {
+    // Cuando se presiona el botón (mouse/touch), iniciar trazado
+    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      if (this.player && !this.player.getIsInvulnerable()) {
+        // Verificar que no estemos tocando el joystick en móviles
+        if (this.virtualJoystick) {
+          const screenX = pointer.x;
+          const screenY = pointer.y;
+          const screenHeight = this.cameras.main.height;
+          const joystickX = 100;
+          const joystickY = screenHeight - 100;
+          const distance = Phaser.Math.Distance.Between(screenX, screenY, joystickX, joystickY);
+          
+          // Si estamos tocando el área del joystick, no iniciar trazado
+          if (distance <= 110) { // radio + margen
+            return;
+          }
+        }
+        
+        this.player.startTracing();
+      }
+    });
+
+    // Cuando se suelta el botón, procesar el trazado
+    this.input.on('pointerup', () => {
+      if (this.player && this.player.isTracing) {
+        this.lineDrawer.processTrace();
+      }
+    });
   }
 
   /**
@@ -204,9 +237,9 @@ export class GameScene extends Phaser.Scene {
     // Evento cuando el jugador es golpeado por un enemigo
     this.events.on(GameEvents.PLAYER_HIT, () => {
       // Solo procesar si el jugador no es invulnerable
-      if (!this.player.getInvulnerable()) {
+      if (!this.player.getIsInvulnerable()) {
         // Hacer invulnerable temporalmente
-        this.player.setInvulnerable();
+        this.player.setInvulnerable(PLAYER_CONFIG.INVULNERABILITY_TIME / 1000);
         
         // Reproducir sonido de daño
         this.audioManager.playHit();

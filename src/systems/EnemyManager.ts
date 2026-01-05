@@ -5,6 +5,7 @@ import { GameEvents } from '../config/events';
 import { Geometry, Point } from '../utils/geometry';
 import { LineDrawer } from './LineDrawer';
 import { PolygonFiller } from './PolygonFiller';
+import { Player } from '../entities/Player';
 
 /**
  * Sistema de gestión de enemigos
@@ -14,6 +15,7 @@ export class EnemyManager {
   private scene: Phaser.Scene;
   private enemies: Enemy[] = [];
   private player?: Phaser.GameObjects.GameObject;
+  private playerInstance?: Player;
   private lineDrawer?: LineDrawer;
   private polygonFiller?: PolygonFiller;
   private spawnTimer?: Phaser.Time.TimerEvent;
@@ -32,6 +34,9 @@ export class EnemyManager {
    */
   public setPlayer(player: Phaser.GameObjects.GameObject): void {
     this.player = player;
+    if (player instanceof Player) {
+      this.playerInstance = player;
+    }
     // Actualizar target de todos los enemigos existentes
     this.enemies.forEach(enemy => enemy.setTarget(player));
   }
@@ -157,9 +162,9 @@ export class EnemyManager {
    * Verifica colisiones entre enemigos y líneas dibujadas
    */
   private checkLineCollision(enemy: Enemy): void {
-    if (!this.lineDrawer) return;
+    if (!this.playerInstance || !this.playerInstance.isTracing) return;
 
-    const points = this.lineDrawer.getPoints();
+    const points = this.playerInstance.getTracePoints();
     if (points.length < 2) return;
 
     const enemyPos = { x: enemy.x, y: enemy.y };
@@ -171,13 +176,15 @@ export class EnemyManager {
       const lineEnd = points[i + 1];
 
       if (Geometry.lineCircleCollision(lineStart, lineEnd, enemyPos, enemyRadius)) {
-        // Colisión detectada: borrar la línea
-        this.lineDrawer.clearLine();
+        // Colisión detectada: cancelar el trazado y golpear al jugador
+        this.playerInstance.cancelTracing();
+        if (this.lineDrawer) {
+          this.lineDrawer.clearLine();
+        }
         
-        // Emitir evento (opcional, para efectos visuales/sonidos)
-        this.scene.events.emit(GameEvents.ENEMY_DESTROYED, {
+        // Emitir evento de golpe al jugador (como en el juego original)
+        this.scene.events.emit(GameEvents.PLAYER_HIT, {
           enemy: enemy,
-          reason: 'line_collision',
         });
 
         // El enemigo continúa (no se destruye por colisión con línea)
