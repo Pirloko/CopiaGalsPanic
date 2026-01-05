@@ -84,32 +84,41 @@ export class GameOverScene extends Phaser.Scene {
       fontStyle: 'bold',
     }).setOrigin(0.5);
 
-    // Botón reiniciar
-    this.restartButton = this.add.text(centerX, centerY + 120, 'Presiona R para reiniciar', {
-      fontSize: '20px',
+    // Detectar si es móvil
+    const isMobile = (globalThis as any).__GAME_IS_MOBILE__ || false;
+
+    // Botón reiniciar (texto adaptado para móvil)
+    const restartText = isMobile ? 'Toca para reiniciar' : 'Presiona R para reiniciar';
+    this.restartButton = this.add.text(centerX, centerY + 120, restartText, {
+      fontSize: '24px',
       fontFamily: 'Arial',
       color: '#00ffff',
+      fontStyle: 'bold',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
-    // Botón menú
-    this.menuButton = this.add.text(centerX, centerY + 160, 'Presiona M para menú', {
-      fontSize: '20px',
+    // Botón menú (texto adaptado para móvil)
+    const menuText = isMobile ? 'Toca para menú' : 'Presiona M para menú';
+    this.menuButton = this.add.text(centerX, centerY + 160, menuText, {
+      fontSize: '24px',
       fontFamily: 'Arial',
       color: '#ffffff',
+      fontStyle: 'bold',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
-    // Controles
-    const rKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.R);
-    rKey.on('down', () => {
-      this.scene.start('GameScene');
-    });
+    // Controles de teclado (si está disponible)
+    if (this.input.keyboard) {
+      const rKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+      rKey.on('down', () => {
+        this.scene.start('GameScene');
+      });
 
-    const mKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.M);
-    mKey.on('down', () => {
-      this.scene.start('MenuScene');
-    });
+      const mKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
+      mKey.on('down', () => {
+        this.scene.start('MenuScene');
+      });
+    }
 
-    // Click en botones
+    // Click/touch en botones (funciona en móviles)
     this.restartButton.on('pointerdown', () => {
       this.scene.start('GameScene');
     });

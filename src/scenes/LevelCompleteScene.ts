@@ -69,8 +69,12 @@ export class LevelCompleteScene extends Phaser.Scene {
       }).setOrigin(0.5).setAlpha(0);
     }
 
+    // Detectar si es móvil
+    const isMobile = (globalThis as any).__GAME_IS_MOBILE__ || false;
+    const continueText = isMobile ? 'Toca para continuar' : 'Presiona ESPACIO para continuar';
+
     // Texto para continuar
-    this.continueText = this.add.text(centerX, centerY + 120, 'Presiona ESPACIO para continuar', {
+    this.continueText = this.add.text(centerX, centerY + 120, continueText, {
       fontSize: '20px',
       fontFamily: 'Arial',
       color: '#aaaaaa',
@@ -106,15 +110,17 @@ export class LevelCompleteScene extends Phaser.Scene {
       },
     });
 
-    // Controles (solo después del fade in)
-    const spaceKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-    spaceKey.on('down', () => {
-      if (this.fadeInComplete) {
-        this.continueToNext();
-      }
-    });
+    // Controles de teclado (si está disponible)
+    if (this.input.keyboard) {
+      const spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+      spaceKey.on('down', () => {
+        if (this.fadeInComplete) {
+          this.continueToNext();
+        }
+      });
+    }
 
-    // Click para continuar
+    // Click/touch para continuar (funciona en móviles)
     this.input.on('pointerdown', () => {
       if (this.fadeInComplete) {
         this.continueToNext();
