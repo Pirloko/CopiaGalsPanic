@@ -17,7 +17,6 @@ export class EnemyManager {
   private lineDrawer?: LineDrawer;
   private polygonFiller?: PolygonFiller;
   private spawnTimer?: Phaser.Time.TimerEvent;
-  private isActive: boolean = false;
   private capturedEnemies: Set<Enemy> = new Set(); // Enemigos ya capturados
   private slowMultiplier: number = 1.0; // Multiplicador de velocidad (para efecto slow)
   private isFrozen: boolean = false; // Si los enemigos están congelados
@@ -55,7 +54,6 @@ export class EnemyManager {
    * Inicia el sistema de spawn de enemigos
    */
   public startSpawning(): void {
-    this.isActive = true;
     
     // Spawn inicial
     this.spawnEnemy();
@@ -73,7 +71,6 @@ export class EnemyManager {
    * Detiene el sistema de spawn
    */
   public stopSpawning(): void {
-    this.isActive = false;
     if (this.spawnTimer) {
       this.spawnTimer.destroy();
       this.spawnTimer = undefined;
@@ -199,11 +196,14 @@ export class EnemyManager {
       // Ignorar enemigos capturados
       if (this.capturedEnemies.has(enemy)) return;
 
+      if (!this.player) return;
+      const playerX = 'x' in this.player ? (this.player as any).x : 0;
+      const playerY = 'y' in this.player ? (this.player as any).y : 0;
       const distance = Phaser.Math.Distance.Between(
         enemy.x,
         enemy.y,
-        this.player!.x,
-        this.player!.y
+        playerX,
+        playerY
       );
 
       const minDistance = ENEMY_CONFIG.SIZE + PLAYER_CONFIG.SIZE;

@@ -8,15 +8,13 @@ import Phaser from 'phaser';
  * para cuando se añadan recursos de audio.
  */
 export class AudioManager {
-  private scene: Phaser.Scene;
   private sounds: Map<string, Phaser.Sound.BaseSound> = new Map();
   private music?: Phaser.Sound.BaseSound;
   private volume: number = 0.5;
   private musicVolume: number = 0.3;
   private enabled: boolean = true;
 
-  constructor(scene: Phaser.Scene) {
-    this.scene = scene;
+  constructor(_scene: Phaser.Scene) {
     // Por ahora, AudioManager está preparado pero no carga sonidos
     // ya que no tenemos archivos de audio en esta fase
     // En FASE 9 se pueden añadir sonidos reales
@@ -51,10 +49,10 @@ export class AudioManager {
   /**
    * Reproduce un efecto de sonido
    */
-  public playSound(key: string): void {
+  public playSound(_key: string): void {
     if (!this.enabled) return;
 
-    const sound = this.sounds.get(key);
+    const sound = this.sounds.get(_key);
     if (sound) {
       (sound as Phaser.Sound.BaseSound).play();
     }
@@ -64,7 +62,7 @@ export class AudioManager {
   /**
    * Reproduce música de fondo
    */
-  public playMusic(key?: string): void {
+  public playMusic(_key?: string): void {
     if (!this.enabled) return;
 
     if (this.music && !this.music.isPlaying) {
@@ -87,7 +85,9 @@ export class AudioManager {
   public setVolume(volume: number): void {
     this.volume = Phaser.Math.Clamp(volume, 0, 1);
     this.sounds.forEach(sound => {
-      (sound as Phaser.Sound.BaseSound).setVolume(this.volume);
+      if ('volume' in sound) {
+        (sound as any).volume = this.volume;
+      }
     });
   }
 
@@ -96,8 +96,8 @@ export class AudioManager {
    */
   public setMusicVolume(volume: number): void {
     this.musicVolume = Phaser.Math.Clamp(volume, 0, 1);
-    if (this.music) {
-      this.music.setVolume(this.musicVolume);
+    if (this.music && 'volume' in this.music) {
+      (this.music as any).volume = this.musicVolume;
     }
   }
 

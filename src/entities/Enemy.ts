@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import { EnemyType, ENEMY_CONFIG } from '../config/gameConfig';
-import { GAME_CONFIG } from '../config/gameConfig';
 
 /**
  * Entidad de enemigo
@@ -8,7 +7,7 @@ import { GAME_CONFIG } from '../config/gameConfig';
  */
 export class Enemy extends Phaser.GameObjects.Arc {
   protected enemyType: EnemyType;
-  protected speed: number;
+  protected speed: number = 0;
   protected target?: Phaser.GameObjects.GameObject; // Target para perseguir (jugador, etc.)
   protected changeDirectionTimer?: Phaser.Time.TimerEvent;
   protected currentDirection: Phaser.Math.Vector2 = new Phaser.Math.Vector2(0, 0);
@@ -122,7 +121,7 @@ export class Enemy extends Phaser.GameObjects.Arc {
   /**
    * Actualiza el enemigo cada frame
    */
-  public update(delta: number, player?: Phaser.GameObjects.GameObject): void {
+  public update(_delta: number, player?: Phaser.GameObjects.GameObject): void {
     const body = this.body as Phaser.Physics.Arcade.Body;
 
     switch (this.enemyType) {
@@ -137,9 +136,9 @@ export class Enemy extends Phaser.GameObjects.Arc {
       case EnemyType.SLOW_CHASER:
       case EnemyType.FAST_CHASER:
         // Perseguir al jugador (velocidad según tipo)
-        if (player) {
-          const dx = player.x - this.x;
-          const dy = player.y - this.y;
+        if (player && 'x' in player && 'y' in player) {
+          const dx = (player as any).x - this.x;
+          const dy = (player as any).y - this.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
           if (distance > 0) {
@@ -173,9 +172,9 @@ export class Enemy extends Phaser.GameObjects.Arc {
 
       case EnemyType.COMBINED:
         // Combina comportamiento: persigue pero con movimiento más errático
-        if (player) {
-          const dx = player.x - this.x;
-          const dy = player.y - this.y;
+        if (player && 'x' in player && 'y' in player) {
+          const dx = (player as any).x - this.x;
+          const dy = (player as any).y - this.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
           if (distance > 0) {

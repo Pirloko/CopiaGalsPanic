@@ -5,9 +5,7 @@ import { GAME_CONFIG } from '../config/gameConfig';
  * Escena del menú principal
  */
 export class MenuScene extends Phaser.Scene {
-  private titleText!: Phaser.GameObjects.Text;
   private startButton!: Phaser.GameObjects.Text;
-  private instructionsText!: Phaser.GameObjects.Text;
 
   constructor() {
     super({ key: 'MenuScene' });
@@ -21,7 +19,7 @@ export class MenuScene extends Phaser.Scene {
     this.add.rectangle(centerX, centerY, GAME_CONFIG.WIDTH, GAME_CONFIG.HEIGHT, 0x1a1a2e);
 
     // Título
-    this.titleText = this.add.text(centerX, centerY - 150, 'GALS PANIC', {
+    this.add.text(centerX, centerY - 150, 'GALS PANIC', {
       fontSize: '64px',
       fontFamily: 'Arial',
       color: '#ff00ff',
@@ -45,7 +43,7 @@ export class MenuScene extends Phaser.Scene {
     });
 
     // Instrucciones
-    this.instructionsText = this.add.text(
+    this.add.text(
       centerX,
       centerY + 100,
       'Usa las FLECHAS para moverte\nCLICK y ARRASTRA para dibujar polígonos\nAtrapa enemigos dentro de los polígonos',

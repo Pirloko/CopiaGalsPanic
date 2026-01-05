@@ -7,6 +7,6 @@ export default defineConfig({
   },
   build: {
     target: 'esnext',
-    minify: 'terser'
+    minify: 'esbuild' // Usar esbuild en lugar de terser (más rápido y no requiere dependencia adicional)
   }
 });

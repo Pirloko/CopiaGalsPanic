@@ -12,8 +12,6 @@ interface GameOverData {
  */
 export class GameOverScene extends Phaser.Scene {
   private gameOverText!: Phaser.GameObjects.Text;
-  private scoreText!: Phaser.GameObjects.Text;
-  private levelText!: Phaser.GameObjects.Text;
   private restartButton!: Phaser.GameObjects.Text;
   private menuButton!: Phaser.GameObjects.Text;
 
@@ -72,14 +70,14 @@ export class GameOverScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Nivel alcanzado
-    this.levelText = this.add.text(centerX, centerY - 20, `Nivel alcanzado: ${finalLevel}`, {
+    this.add.text(centerX, centerY - 20, `Nivel alcanzado: ${finalLevel}`, {
       fontSize: '20px',
       fontFamily: 'Arial',
       color: '#aaaaaa',
     }).setOrigin(0.5);
 
     // Puntaje final
-    this.scoreText = this.add.text(centerX, centerY + 30, `Puntaje final: ${finalScore.toLocaleString()}`, {
+    this.add.text(centerX, centerY + 30, `Puntaje final: ${finalScore.toLocaleString()}`, {
       fontSize: '28px',
       fontFamily: 'Arial',
       color: '#ffff00',

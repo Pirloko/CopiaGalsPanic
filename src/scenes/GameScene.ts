@@ -20,8 +20,6 @@ import { HUD } from '../ui/HUD';
  */
 export class GameScene extends Phaser.Scene {
   private player!: Player;
-  private gameArea!: Phaser.GameObjects.Rectangle;
-  private hudArea!: Phaser.GameObjects.Rectangle;
   private lineDrawer!: LineDrawer;
   private polygonFiller!: PolygonFiller;
   private levelManager!: LevelManager;
@@ -60,7 +58,7 @@ export class GameScene extends Phaser.Scene {
     );
 
     // Área de juego (borde visual)
-    this.gameArea = this.add.rectangle(
+    this.add.rectangle(
       GAME_CONFIG.GAME_AREA_WIDTH / 2,
       GAME_CONFIG.GAME_AREA_HEIGHT / 2,
       GAME_CONFIG.GAME_AREA_WIDTH,
@@ -70,7 +68,7 @@ export class GameScene extends Phaser.Scene {
     ).setStrokeStyle(2, 0xffffff);
 
     // Área HUD (placeholder visual)
-    this.hudArea = this.add.rectangle(
+    this.add.rectangle(
       GAME_CONFIG.GAME_AREA_WIDTH + GAME_CONFIG.HUD_WIDTH / 2,
       GAME_CONFIG.HEIGHT / 2,
       GAME_CONFIG.HUD_WIDTH,
@@ -301,7 +299,7 @@ export class GameScene extends Phaser.Scene {
     this.hud.updatePercentage(revealedPercentage, requiredPercentage);
   }
 
-  update(time: number, delta: number): void {
+  update(_time: number, delta: number): void {
     // Actualizar jugador
     this.player.update(delta);
 

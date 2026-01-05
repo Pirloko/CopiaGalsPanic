@@ -103,9 +103,6 @@ export class LineDrawer {
 
     // Si hay suficientes puntos, intentar validar y cerrar
     if (this.points.length >= 3) {
-      // Cerrar el polígono conectando el último punto con el primero
-      const closedPolygon = [...this.points, this.points[0]];
-      
       // Validar el polígono
       if (Geometry.isValidPolygon(this.points)) {
         this.onPolygonClosed(this.points);
@@ -251,7 +248,7 @@ export class LineDrawer {
   /**
    * Actualización del sistema (para lógica adicional si es necesaria)
    */
-  public update(delta: number): void {
+  public update(_delta: number): void {
     // Por ahora no hay lógica adicional, pero se deja preparado
   }
 

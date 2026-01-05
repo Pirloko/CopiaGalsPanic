@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { PowerUpType, POWERUP_CONFIG, GAME_CONFIG } from '../config/gameConfig';
+import { PowerUpType, POWERUP_CONFIG } from '../config/gameConfig';
 
 /**
  * Entidad de power-up

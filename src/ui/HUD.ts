@@ -198,7 +198,7 @@ export class HUD {
    * Actualiza el texto del nivel
    */
   public updateLevel(level: number): void {
-    this.currentLevel = level;
+    this.currentLevel = level; // Se usa para mantener el estado
     this.levelText.setText(level.toString());
   }
 
@@ -221,8 +221,8 @@ export class HUD {
    * Actualiza el porcentaje revelado
    */
   public updatePercentage(revealed: number, required: number): void {
-    this.currentPercentage = revealed;
-    this.requiredPercentage = required;
+    this.currentPercentage = revealed; // Se usa para mantener el estado
+    this.requiredPercentage = required; // Se usa para mantener el estado
     this.percentageText.setText(
       `${revealed.toFixed(1)}% / ${required.toFixed(0)}%`
     );

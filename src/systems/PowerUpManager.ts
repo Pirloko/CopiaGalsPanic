@@ -122,7 +122,7 @@ export class PowerUpManager {
   /**
    * Actualiza todos los power-ups y verifica colisiones
    */
-  public update(delta: number): void {
+  public update(_delta: number): void {
     // Verificar colisiones con jugador
     if (this.player) {
       this.checkPlayerCollision();
@@ -141,11 +141,14 @@ export class PowerUpManager {
     this.powerUps.forEach(powerUp => {
       if (!powerUp.active) return;
 
+      if (!this.player) return;
+      const playerX = 'x' in this.player ? (this.player as any).x : 0;
+      const playerY = 'y' in this.player ? (this.player as any).y : 0;
       const distance = Phaser.Math.Distance.Between(
         powerUp.x,
         powerUp.y,
-        this.player!.x,
-        this.player!.y
+        playerX,
+        playerY
       );
 
       const minDistance = POWERUP_CONFIG.SIZE + PLAYER_CONFIG.SIZE;
